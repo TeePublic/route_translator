@@ -13,6 +13,12 @@ module RouteTranslator
             klass_name.constantize::TestCase.__send__(:include, helper_container)
           end
         end
+        
+        def add_helpers_to_rspec(helper_container)
+          return unless Module.const_defined?('RSpec::Core::ExampleGroup')
+
+          RSpec::Core::ExampleGroup.__send__(:include, helper_container)
+        end
       end
 
       module_function
@@ -35,7 +41,10 @@ module RouteTranslator
             __send__(Translator.route_name_for(args, old_name, suffix, self), *args)
           end
 
-          add_helpers_to_test_cases(helper_container) if ENV['RAILS_ENV'] == 'test'
+          if ENV['RAILS_ENV'] == 'test'
+            add_helpers_to_test_cases(helper_container)
+            add_helpers_to_rspec(helper_container)
+          end
         end
       end
     end
